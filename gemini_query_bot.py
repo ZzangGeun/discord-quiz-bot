@@ -59,9 +59,9 @@ def generate_quiz():
         
         #제미나이 설정
         response = client.models.generate_content(                                                                                                                                                             
-            model="gemini-1.5-flash", contents=query_text,                                                                                                                                       
+            model="gemini-2.5-flash-preview-04-17", contents=query_text,                                                                                                                                       
             config=types.GenerateContentConfig(                                                                                                                                                                
-                temperature=0.3,
+                temperature=1.5,
                 max_output_tokens=1500,  # 최대 출력 토큰 수                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
             )                                                                                                                                                                                                  
         )
