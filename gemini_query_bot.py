@@ -5,6 +5,7 @@ import schedule
 import time
 from datetime import datetime
 from config import GEMINI_API_KEY
+from database_helper import get_db_connection, init_database, IS_RAILWAY
 
 # 환경변수에서 API 키 가져오기
 if not GEMINI_API_KEY:
@@ -48,52 +49,20 @@ d)
 ★답: (def square_elements(lst): return [x**2 for x in lst])
 """
 
-def init_database():
-    """데이터베이스 초기화"""
-    conn = sqlite3.connect('quiz_database.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS quizzes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            sent_to_discord BOOLEAN DEFAULT FALSE,
-            quiz_sent_at TIMESTAMP NULL,
-            answer_sent BOOLEAN DEFAULT FALSE,
-            answer_sent_at TIMESTAMP NULL
-        )
-    ''')
-    
-    # 기존 테이블에 컬럼이 없다면 추가
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN quiz_sent_at TIMESTAMP NULL')
-    except sqlite3.OperationalError:
-        pass  # 컬럼이 이미 존재함
-    
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent BOOLEAN DEFAULT FALSE')
-    except sqlite3.OperationalError:
-        pass  # 컬럼이 이미 존재함
-        
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent_at TIMESTAMP NULL')
-    except sqlite3.OperationalError:
-        pass  # 컬럼이 이미 존재함
-    
-    conn.commit()
-    conn.close()
+# init_database 함수는 database_helper에서 import됨
 
 def generate_quiz():
     """퀴즈를 생성하고 데이터베이스에 저장"""
     try:
         print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중...")
-          #제미나이 설정
+        print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
+        
+        #제미나이 설정
         response = client.models.generate_content(                                                                                                                                                             
-            model="gemini-2.5-flash-preview-04-17", contents=query_text,                                                                                                                                       
+            model="gemini-1.5-flash", contents=query_text,                                                                                                                                       
             config=types.GenerateContentConfig(                                                                                                                                                                
                 temperature=0.3,
-                max_output_tokens=1000,  # 최대 출력 토큰 수                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+                max_output_tokens=1500,  # 최대 출력 토큰 수                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
             )                                                                                                                                                                                                  
         )
         
@@ -109,13 +78,8 @@ def generate_quiz():
             print("❌ 생성된 퀴즈 내용이 비어있습니다.")
             return
         
-        # 빈 내용 체크
-        if not quiz_content:
-            print("❌ 생성된 퀴즈 내용이 비어있습니다.")
-            return
-        
         # 데이터베이스에 저장
-        conn = sqlite3.connect('quiz_database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         cursor.execute(
@@ -123,21 +87,31 @@ def generate_quiz():
             (quiz_content,)
         )
         
-        conn.commit()
+        # Railway가 아닌 경우에만 commit과 close
+        if not IS_RAILWAY:
+            conn.commit()
+            conn.close()
+        else:
+            conn.commit()  # 메모리 DB도 commit은 필요
+        
         quiz_id = cursor.lastrowid
-        conn.close()
         
         print(f"✅ 퀴즈 ID {quiz_id} 생성 완료!")
         print(f"📝 내용 미리보기: {quiz_content[:100]}...")
         
-        # 파일에도 백업 저장
-        with open("cote_bot.txt", "a", encoding="utf-8") as file:
-            file.write(f"\n[{datetime.now()}] Quiz ID: {quiz_id}\n")
-            file.write(quiz_content)
-            file.write("\n" + "="*50 + "\n")
+        # 파일 백업 저장 (Railway에서도 임시로 저장)
+        try:
+            with open("cote_bot.txt", "a", encoding="utf-8") as file:
+                file.write(f"\n[{datetime.now()}] Quiz ID: {quiz_id}\n")
+                file.write(quiz_content)
+                file.write("\n" + "="*50 + "\n")
+        except Exception as file_error:
+            print(f"⚠️ 파일 백업 실패 (Railway에서는 정상): {file_error}")
             
     except Exception as e:
         print(f"❌ 퀴즈 생성 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
 
 def run_scheduler():
     """스케줄러 실행"""

@@ -1,52 +1,18 @@
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
-import sqlite3
 import asyncio
 from datetime import datetime, timedelta
 from typing import Optional
 from ai_quiz_functions import process_string_by_argument
 from config import BOT_TOKEN, QUIZ_CHANNEL_ID
+from database_helper import get_db_connection, init_database, IS_RAILWAY
 
 # 봇 설정 (Privileged Intents 없이)
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-def init_database():
-    """데이터베이스 초기화"""
-    conn = sqlite3.connect('quiz_database.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS quizzes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            sent_to_discord BOOLEAN DEFAULT FALSE,
-            quiz_sent_at TIMESTAMP NULL,
-            answer_sent BOOLEAN DEFAULT FALSE,
-            answer_sent_at TIMESTAMP NULL
-        )
-    ''')
-    
-    # 기존 테이블에 컬럼이 없다면 추가
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN quiz_sent_at TIMESTAMP NULL')
-    except sqlite3.OperationalError:
-        pass  # 컬럼이 이미 존재함
-    
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent BOOLEAN DEFAULT FALSE')
-    except sqlite3.OperationalError:
-        pass  # 컬럼이 이미 존재함
-        
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent_at TIMESTAMP NULL')
-    except sqlite3.OperationalError:
-        pass  # 컬럼이 이미 존재함
-    
-    conn.commit()
-    conn.close()
+# init_database 함수는 database_helper에서 import됨
 
 @bot.event
 async def on_ready():
@@ -74,7 +40,7 @@ async def send_quiz_task():
             print("⚠️ QUIZ_CHANNEL_ID가 설정되지 않았습니다. 환경변수를 확인해주세요.")
             return
             
-        conn = sqlite3.connect('quiz_database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # 아직 전송되지 않은 퀴즈 가져오기
@@ -103,12 +69,19 @@ async def send_quiz_task():
                     SET sent_to_discord = TRUE, quiz_sent_at = ? 
                     WHERE id = ?
                 ''', (datetime.now(), quiz_id))
-                conn.commit()
+                
+                if not IS_RAILWAY:
+                    conn.commit()
+                    conn.close()
+                else:
+                    conn.commit()
+                    
                 print(f"✅ 퀴즈 ID {quiz_id} 전송 완료 - 30분 후 답변 예정")
             else:
                 print(f"❌ 채널 ID {QUIZ_CHANNEL_ID}는 텍스트 채널이 아닙니다.")
-        
-        conn.close()
+        else:
+            if not IS_RAILWAY:
+                conn.close()
         
     except Exception as e:
         print(f"❌ 퀴즈 전송 중 오류: {e}")
@@ -121,7 +94,7 @@ async def send_answer_task():
             print("⚠️ QUIZ_CHANNEL_ID가 설정되지 않았습니다. 환경변수를 확인해주세요.")
             return
             
-        conn = sqlite3.connect('quiz_database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # 30분이 지났고 아직 답변이 전송되지 않은 퀴즈 찾기
@@ -153,12 +126,18 @@ async def send_answer_task():
                     SET answer_sent = TRUE, answer_sent_at = ? 
                     WHERE id = ?
                 ''', (datetime.now(), quiz_id))
-                conn.commit()
+                
+                if not IS_RAILWAY:
+                    conn.commit()
+                else:
+                    conn.commit()
+                    
                 print(f"✅ 퀴즈 ID {quiz_id} 답변 전송 완료")
             else:
                 print(f"❌ 채널 ID {QUIZ_CHANNEL_ID}는 텍스트 채널이 아닙니다.")
         
-        conn.close()
+        if not IS_RAILWAY:
+            conn.close()
         
     except Exception as e:
         print(f"❌ 답변 전송 중 오류: {e}")
@@ -168,7 +147,7 @@ async def send_answer_task():
 async def show_answer(interaction: discord.Interaction, quiz_id: Optional[int] = None):
     """퀴즈의 답을 보여주는 슬래시 명령어"""
     try:
-        conn = sqlite3.connect('quiz_database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         if quiz_id:
@@ -191,7 +170,8 @@ async def show_answer(interaction: discord.Interaction, quiz_id: Optional[int] =
         else:
             await interaction.response.send_message("❌ 해당 퀴즈를 찾을 수 없습니다.")
         
-        conn.close()
+        if not IS_RAILWAY:
+            conn.close()
         
     except Exception as e:
         await interaction.response.send_message(f"❌ 오류가 발생했습니다: {e}")
@@ -200,7 +180,7 @@ async def show_answer(interaction: discord.Interaction, quiz_id: Optional[int] =
 async def manual_quiz(interaction: discord.Interaction):
     """수동으로 퀴즈를 요청하는 슬래시 명령어"""
     try:
-        conn = sqlite3.connect('quiz_database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
@@ -218,7 +198,8 @@ async def manual_quiz(interaction: discord.Interaction):
         else:
             await interaction.response.send_message("❌ 저장된 퀴즈가 없습니다.")
         
-        conn.close()
+        if not IS_RAILWAY:
+            conn.close()
         
     except Exception as e:
         await interaction.response.send_message(f"❌ 오류가 발생했습니다: {e}")
