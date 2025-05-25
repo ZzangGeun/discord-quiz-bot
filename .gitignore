@@ -1,0 +1,39 @@
+# 환경변수 파일 (민감한 정보 포함)
+.env
+.env.local
+.env.production
+
+# Python 캐시 파일
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# 데이터베이스 파일
+*.db
+*.sqlite3
+
+# IDE 설정 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 로그 파일
+*.log
+
+# OS 생성 파일
+.DS_Store
+Thumbs.db
+
+# 의존성 디렉토리
+node_modules/
+venv/
+env/
+
+# 빌드 결과물
+dist/
+build/
+*.egg-info/
