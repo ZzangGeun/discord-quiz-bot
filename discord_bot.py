@@ -27,7 +27,7 @@ async def on_ready():
     send_quiz_task.start()  # 퀴즈 전송 태스크 시작
     send_answer_task.start()  # 답변 전송 태스크 시작
 
-@tasks.loop(minutes=10)  # 10분마다 새로운 퀴즈 확인
+@tasks.loop(hours=3)  # 3시간마다 새로운 퀴즈 확인
 async def send_quiz_task():
     """DB에서 새로운 퀴즈를 확인하고 디스코드에 전송"""
     try:
@@ -74,7 +74,7 @@ async def send_quiz_task():
     except Exception as e:
         print(f"❌ 퀴즈 전송 중 오류: {e}")
 
-@tasks.loop(minutes=5)  # 5분마다 답변 전송 확인
+@tasks.loop(minutes=30)  # 30분마다 답변 전송 확인
 async def send_answer_task():
     """30분이 지난 퀴즈의 답변을 전송"""
     try:

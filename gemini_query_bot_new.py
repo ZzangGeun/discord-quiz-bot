@@ -18,10 +18,10 @@ query_text = """
 
 2. 작업                                                                                                                                                                                               
 1) 너는 대답하지말고 바로 문제를 출제하면 돼.
-2) 너는 코딩테스트, 알고리즘, SQL등 테스트를 위해 문제를 출제하는 AI야.                                                                                                                                         
+2) 너는 코딩테스트, 알고리즘, SQL등 테스트를 위해 문제를 출제하는 AI야 난이도는 컴퓨터공학과의 학부 졸업생이 눈으로 10분 안에 풀 정도면 돼.                                                                                                                                         
 3) 선택한 학문과 관련해서 구글 검색을 이용해서 개념을 매우 상세히 학습 후 다양한 문제를 출제하면 돼.
 4) 문제 중 코딩테스트의 경우는 파이썬 기준으로 작성을 하고 선지에는 결과 값을 넣거나 작성 코드에 빈칸을 넣어 선지로 선택할 수 있도록 해줘.                                                                                                                             
-5) 학습한 개념을 가지고 객관식 문제를 1문제만 출제해.                                                                                                                                                 
+5) 학습한 개념을 가지고 객관식 또는 주관식 문제를 1문제만 출제해.                                                                                                                                                 
 주의) 절대로 순서대로 문제를 출제하지마. 출제할 개념의 순서는 랜덤으로 가지고 와야해.                                                                                                                 
 
 3. 표현                                                                                                                                                                                               
@@ -34,13 +34,18 @@ d)
 ★답: (답)                                                                                                                                                                                             
 주의) ★는 선지와 답을 구분해주기 위한 구분자야.
 
-4. 예시                                                                                                                                                                                               
+4. 예시(객관식 문제)                                                                                                                                                                                               
 오늘의 문제- 다음 중 SQL DML에서 데이터를 삭제하는 명령어는 무엇인가요?                                                                                                                                      
 - a) SELECT                                                                                                                                                                   
 - b) INSERT                                                                                                                                                             
 - c) UPDATE                                                                                                                                                          
 - d) DELETE                                                                                                                                                                            
-★답: (d)               
+★답: (d)
+
+5. 예시(주관식 문제)
+파이썬에서 리스트의 모든 요소를 제곱하는 함수를 작성하세요.
+
+★답: (def square_elements(lst): return [x**2 for x in lst])
 """
 
 def init_database():
@@ -69,7 +74,8 @@ def generate_quiz():
         response = client.models.generate_content(                                                                                                                                                             
             model="gemini-2.5-flash-preview-04-17", contents=query_text,                                                                                                                                       
             config=types.GenerateContentConfig(                                                                                                                                                                
-                temperature=1.7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                temperature=0.3,
+                max_output_tokens=1000,  # 최대 출력 토큰 수                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
             )                                                                                                                                                                                                  
         )
         
@@ -110,14 +116,14 @@ def run_scheduler():
     
     # 첫 번째 퀴즈 즉시 생성
     generate_quiz()
-    
+
     # 1시간마다 퀴즈 생성 스케줄
     schedule.every(1).hours.do(generate_quiz)
-    
+
     # 스케줄러 실행
     while True:
         schedule.run_pending()
-        time.sleep(60)  # 1분마다 체크
+        time.sleep(600)  # 10분마다 체크
 
 if __name__ == "__main__":
     run_scheduler()
