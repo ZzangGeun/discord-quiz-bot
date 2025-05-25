@@ -12,10 +12,49 @@ from config import BOT_TOKEN, QUIZ_CHANNEL_ID
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+def init_database():
+    """데이터베이스 초기화"""
+    conn = sqlite3.connect('quiz_database.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quizzes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            sent_to_discord BOOLEAN DEFAULT FALSE,
+            quiz_sent_at TIMESTAMP NULL,
+            answer_sent BOOLEAN DEFAULT FALSE,
+            answer_sent_at TIMESTAMP NULL
+        )
+    ''')
+    
+    # 기존 테이블에 컬럼이 없다면 추가
+    try:
+        cursor.execute('ALTER TABLE quizzes ADD COLUMN quiz_sent_at TIMESTAMP NULL')
+    except sqlite3.OperationalError:
+        pass  # 컬럼이 이미 존재함
+    
+    try:
+        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent BOOLEAN DEFAULT FALSE')
+    except sqlite3.OperationalError:
+        pass  # 컬럼이 이미 존재함
+        
+    try:
+        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent_at TIMESTAMP NULL')
+    except sqlite3.OperationalError:
+        pass  # 컬럼이 이미 존재함
+    
+    conn.commit()
+    conn.close()
+
 @bot.event
 async def on_ready():
     print(f'{bot.user} 봇이 준비되었습니다!')
     print(f"타겟 채널 ID: {QUIZ_CHANNEL_ID}")
+    
+    # 데이터베이스 초기화
+    init_database()
     
     # 슬래시 명령어 동기화
     try:

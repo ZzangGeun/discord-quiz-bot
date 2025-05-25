@@ -58,9 +58,28 @@ def init_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             content TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            sent_to_discord BOOLEAN DEFAULT FALSE
+            sent_to_discord BOOLEAN DEFAULT FALSE,
+            quiz_sent_at TIMESTAMP NULL,
+            answer_sent BOOLEAN DEFAULT FALSE,
+            answer_sent_at TIMESTAMP NULL
         )
     ''')
+    
+    # 기존 테이블에 컬럼이 없다면 추가
+    try:
+        cursor.execute('ALTER TABLE quizzes ADD COLUMN quiz_sent_at TIMESTAMP NULL')
+    except sqlite3.OperationalError:
+        pass  # 컬럼이 이미 존재함
+    
+    try:
+        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent BOOLEAN DEFAULT FALSE')
+    except sqlite3.OperationalError:
+        pass  # 컬럼이 이미 존재함
+        
+    try:
+        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent_at TIMESTAMP NULL')
+    except sqlite3.OperationalError:
+        pass  # 컬럼이 이미 존재함
     
     conn.commit()
     conn.close()
@@ -69,8 +88,7 @@ def generate_quiz():
     """퀴즈를 생성하고 데이터베이스에 저장"""
     try:
         print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중...")
-        
-        #제미나이 설정
+          #제미나이 설정
         response = client.models.generate_content(                                                                                                                                                             
             model="gemini-2.5-flash-preview-04-17", contents=query_text,                                                                                                                                       
             config=types.GenerateContentConfig(                                                                                                                                                                
@@ -79,7 +97,22 @@ def generate_quiz():
             )                                                                                                                                                                                                  
         )
         
+        # API 응답 검증
+        if response is None or response.text is None:
+            print("❌ Gemini API에서 빈 응답을 받았습니다. 다시 시도합니다...")
+            return
+            
         quiz_content = response.text.strip()
+        
+        # 빈 내용 체크
+        if not quiz_content:
+            print("❌ 생성된 퀴즈 내용이 비어있습니다.")
+            return
+        
+        # 빈 내용 체크
+        if not quiz_content:
+            print("❌ 생성된 퀴즈 내용이 비어있습니다.")
+            return
         
         # 데이터베이스에 저장
         conn = sqlite3.connect('quiz_database.db')
