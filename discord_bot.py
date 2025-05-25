@@ -8,8 +8,9 @@ from ai_quiz_functions import process_string_by_argument
 from config import BOT_TOKEN, QUIZ_CHANNEL_ID
 from database_helper import get_db_connection, init_database, IS_RAILWAY
 
-# 봇 설정 (Privileged Intents 없이)
+# 봇 설정 (슬래시 명령어만 사용하므로 메시지 내용 권한 불필요)
 intents = discord.Intents.default()
+intents.message_content = False  # 메시지 내용 읽기 비활성화로 경고 제거
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # init_database 함수는 database_helper에서 import됨
