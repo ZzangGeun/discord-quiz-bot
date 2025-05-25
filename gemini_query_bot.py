@@ -28,18 +28,25 @@ query_text = """
 3. 표현                                                                                                                                                                                               
 - 너의 응답 양식은 다음과 같아.                                                                                                                                                                       
 오늘의 문제- (문제)                                                                                                                                                                                   
-a)                                                                                                                                                                                                    
-b)                                                                                                                                                                                                    
-c)                                                                                                                                                                                                    
-d)                                                                                                                                                                                                    
+a)
+
+b)
+
+c)
+
+d)
+
 ★답: (답)                                                                                                                                                                                             
 주의) ★는 선지와 답을 구분해주기 위한 구분자야.
 
 4. 예시(객관식 문제)                                                                                                                                                                                               
 오늘의 문제- 다음 중 SQL DML에서 데이터를 삭제하는 명령어는 무엇인가요?                                                                                                                                      
-- a) SELECT                                                                                                                                                                   
-- b) INSERT                                                                                                                                                             
-- c) UPDATE                                                                                                                                                          
+- a) SELECT
+
+- b) INSERT
+
+- c) UPDATE
+
 - d) DELETE                                                                                                                                                                            
 ★답: (d)
 
