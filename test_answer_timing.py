@@ -24,7 +24,7 @@ def test_answer_timing():
     print("-" * 50)
     
     for quiz_id, content, sent, quiz_sent_at, answer_sent in results:
-        quiz_part = content.split(';')[0][:30] + "..." if len(content.split(';')[0]) > 30 else content.split(';')[0]
+        quiz_part = content.split('★')[0][:30] + "..." if len(content.split('★')[0]) > 30 else content.split('★')[0]
         print(f"{quiz_id:2d} | {sent:6} | {quiz_sent_at or 'None':16} | {answer_sent}")
         
     # 30분 지난 퀴즈 찾기 (테스트용으로 30초로 변경)
@@ -44,7 +44,7 @@ def test_answer_timing():
     print(f"\n✅ 답변 준비된 퀴즈: {len(ready_for_answer)}개")
     
     for quiz_id, content in ready_for_answer:
-        answer = content.split(';')[1] if ';' in content else "답변 없음"
+        answer = content.split('★')[1] if '★' in content else "답변 없음"
         print(f"  - 퀴즈 #{quiz_id}: {answer}")
     
     conn.close()

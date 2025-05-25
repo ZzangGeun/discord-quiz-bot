@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "discord-quiz-bot"
+version = "0.1.0"
+description = "Discord Quiz Bot with AI"
+author = "Your Name"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+discord = "^2.3.2"
+google-genai = "^0.7.0"
+schedule = "^1.2.0"
+requests = "^2.31.0"
+flask = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

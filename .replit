@@ -1,0 +1,23 @@
+# Replit 설정 파일
+modules = ["python-3.10"]
+run = "python main_replit.py"
+
+[nix]
+channel = "stable-22_11"
+
+[env]
+VIRTUAL_ENV = "/home/runner/${REPL_SLUG}/venv"
+PATH = "${VIRTUAL_ENV}/bin"
+PYTHONPATH = "${VIRTUAL_ENV}/lib/python3.10/site-packages"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[languages]
+
+[languages.python3]
+pattern = "**/*.py"
+
+[languages.python3.languageServer]
+start = "pylsp"
