@@ -153,8 +153,8 @@ discord_bot_clean/
 ## 🔧 주요 설정
 
 ### Gemini AI 설정
-- **모델**: `gemini-1.5-flash`
-- **Temperature**: 0.8 (다양성 보장)
+- **모델**: `gemini-2.5-flash-preview-04-17`
+- **Temperature**: 1.5 (다양성 보장)
 - **최대 토큰**: 1500
 
 ### Discord 봇 권한
