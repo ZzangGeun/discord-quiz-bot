@@ -60,7 +60,7 @@ async def send_quiz_task():
             if isinstance(channel, discord.TextChannel):
                 # 퀴즈 문제만 추출 (답 제외)
                 quiz_only = process_string_by_argument(quiz_content, '1')
-                await channel.send(f"🎯 **퀴즈 #{quiz_id}**\n{quiz_only}\n\n⏰ *30분 후에 정답이 공개됩니다!*")
+                await channel.send(f"🎯 **퀴즈 #{quiz_id}**\n{quiz_only}\n\n⏰ *1시간 후에 정답이 공개됩니다!*")
                 
                 # 전송 완료 표시 및 전송 시간 기록
                 cursor.execute('''
@@ -70,7 +70,7 @@ async def send_quiz_task():
                 ''', (datetime.now(), quiz_id))
                 
                 conn.commit()
-                print(f"✅ 퀴즈 ID {quiz_id} 전송 완료 - 30분 후 답변 예정")
+                print(f"✅ 퀴즈 ID {quiz_id} 전송 완료 - 1시간 후 답변 예정")
             else:
                 print(f"❌ 채널 ID {QUIZ_CHANNEL_ID}는 텍스트 채널이 아닙니다.")
         
