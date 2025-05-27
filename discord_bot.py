@@ -35,6 +35,12 @@ async def on_ready():
 async def send_quiz_task():
     """DB에서 새로운 퀴즈를 확인하고 디스코드에 전송"""
     try:
+        # 현재 시간 확인 (오전 0시~9시는 퀴즈 전송 안함)
+        current_hour = datetime.now().hour
+        if 0 <= current_hour < 9:
+            print(f"🌙 현재 시간 {current_hour}시 - 야간 시간대로 퀴즈 전송을 건너뜁니다.")
+            return
+            
         if QUIZ_CHANNEL_ID is None:
             print("⚠️ QUIZ_CHANNEL_ID가 설정되지 않았습니다. 환경변수를 확인해주세요.")
             return
