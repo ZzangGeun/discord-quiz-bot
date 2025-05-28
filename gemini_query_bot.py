@@ -97,6 +97,26 @@ int knapsack(int W, int weights[], int values[], int n) {
 
 # init_database 함수는 database_helper에서 import됨
 
+def test_gemini_connection():
+    """Gemini API 연결 테스트"""
+    try:
+        print("🔍 Gemini API 연결 테스트 중...")
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-preview-05-20",
+            contents="안녕하세요. 간단한 테스트입니다."
+        )
+        
+        if response and hasattr(response, 'text') and response.text:
+            print("✅ Gemini API 연결 성공!")
+            print(f"📄 응답: {response.text[:100]}...")
+            return True
+        else:
+            print("❌ API 응답이 비어있습니다.")
+            return False
+    except Exception as e:
+        print(f"❌ API 연결 실패: {e}")
+        return False
+
 
 def generate_quiz():
     """퀴즈를 생성하고 데이터베이스에 저장"""
@@ -107,39 +127,51 @@ def generate_quiz():
             print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중... (시도 {attempt + 1}/{max_retries})")
             print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
             
-            # 제미나이 설정
+            # 제미나이 설정 - 더 간단한 방식으로 호출
             response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",  # 더 안정적인 모델로 변경
-                contents=[
-                    {
-                        "role": "user",
-                        "parts": [
-                            {
-                                "text": query_text
-                            }
-                        ]
-                    }
-                ],
+                model="gemini-2.5-flash-preview-05-20",
+                contents=query_text,  # 더 간단한 방식
                 config=types.GenerateContentConfig(
-                    temperature=1.2,  # 온도를 낮춰서 더 안정적인 응답
-                    max_output_tokens=1000,  # 토큰 수를 줄여서 안정성 향상
+                    temperature=1.2,
+                    max_output_tokens=2000,
                 )
             )
 
-            # API 응답 상세 검증
+            # API 응답 상세 검증 및 디버깅
+            print(f"🔍 디버그: response 타입: {type(response)}")
+            print(f"🔍 디버그: response 속성: {dir(response) if response else 'None'}")
+            
             if response is None:
                 print(f"❌ 시도 {attempt + 1}: response가 None입니다.")
                 continue
-                
-            if not hasattr(response, 'text') or response.text is None:
-                print(f"❌ 시도 {attempt + 1}: response.text가 None입니다.")
+            
+            # candidates 속성을 통해 접근 시도
+            quiz_content = None
+            try:
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    if hasattr(candidate, 'content') and candidate.content:
+                        if hasattr(candidate.content, 'parts') and candidate.content.parts:
+                            quiz_content = candidate.content.parts[0].text
+                elif hasattr(response, 'text'):
+                    quiz_content = response.text
+                else:
+                    print(f"🔍 디버그: response 구조를 파악할 수 없습니다.")
+                    print(f"🔍 디버그: response 내용: {response}")
+                    continue
+            except Exception as parse_error:
+                print(f"❌ 응답 파싱 오류: {parse_error}")
                 continue
                 
-            quiz_content = response.text.strip()
+            if not quiz_content:
+                print(f"❌ 시도 {attempt + 1}: 생성된 퀴즈 내용이 비어있습니다.")
+                continue
+            
+            quiz_content = quiz_content.strip()
             
             # 빈 내용 체크
             if not quiz_content:
-                print(f"❌ 시도 {attempt + 1}: 생성된 퀴즈 내용이 비어있습니다.")
+                print(f"❌ 시도 {attempt + 1}: 퀴즈 내용이 공백입니다.")
                 continue
             
             # 성공적으로 응답을 받았으면 나머지 로직 실행
@@ -200,6 +232,11 @@ def run_scheduler():
     
     # 데이터베이스 초기화
     init_database()
+    
+    # API 연결 테스트
+    if not test_gemini_connection():
+        print("❌ Gemini API 연결에 실패했습니다. API 키를 확인해주세요.")
+        return
     
     # 첫 번째 퀴즈 즉시 생성
     generate_quiz()
