@@ -104,13 +104,24 @@ def generate_quiz():
         print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
         
         #제미나이 설정
-        response = client.models.generate_content(                                                                                                                                                             
-            model="gemini-2.5-flash-preview-04-17", contents=query_text,                                                                                                                                       
-            config=types.GenerateContentConfig(                                                                                                                                                                
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-preview-04-17",
+            contents=[
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": query_text
+                        }
+                    ]
+                }
+            ],
+            config=types.GenerateContentConfig(
                 temperature=1.5,
-                max_output_tokens=1500,  # 최대 출력 토큰 수                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-            )                                                                                                                                                                                                  
+                max_output_tokens=1500,
+            )
         )
+
         
         # API 응답 검증
         if response is None or response.text is None:
