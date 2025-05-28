@@ -34,6 +34,11 @@ async def on_ready():
 @tasks.loop(minutes=1)
 async def send_quiz_task():
     now = get_kst_now()
+    
+    # 오전 0시부터 9시까지는 퀴즈를 보내지 않음
+    if 0 <= now.hour < 9:
+        return
+    
     if now.hour % 3 == 0 and now.minute == 0:
         try:
             if QUIZ_CHANNEL_ID is None:
@@ -67,7 +72,7 @@ async def send_quiz_task():
                             WHERE id = ?
                         ''', (get_kst_now(), quiz_id))
                         conn.commit()
-                        print(f"✅ 퀴즈 ID {quiz_id} 전송 완료")
+                        print(f"✅ 퀴즈 ID {quiz_id} 전송 완료 (시간: {now.hour}시)")
                     else:
                         print(f"❌ 채널을 찾을 수 없거나 텍스트 채널이 아닙니다.")
             conn.close()
