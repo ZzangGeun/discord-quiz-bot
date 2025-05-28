@@ -97,45 +97,68 @@ int knapsack(int W, int weights[], int values[], int n) {
 
 # init_database 함수는 database_helper에서 import됨
 
+
 def generate_quiz():
     """퀴즈를 생성하고 데이터베이스에 저장"""
-    try:
-        print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중...")
-        print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
-        
-        #제미나이 설정
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-04-17",
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        {
-                            "text": query_text
-                        }
-                    ]
-                }
-            ],
-            config=types.GenerateContentConfig(
-                temperature=1.5,
-                max_output_tokens=1500,
-            )
-        )
-
-        
-        # API 응답 검증
-        if response is None or response.text is None:
-            print("❌ Gemini API에서 빈 응답을 받았습니다. 다시 시도합니다...")
-            return
+    max_retries = 3
+    
+    for attempt in range(max_retries):
+        try:
+            print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중... (시도 {attempt + 1}/{max_retries})")
+            print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
             
-        quiz_content = response.text.strip()
-        
-        # 빈 내용 체크
-        if not quiz_content:
-            print("❌ 생성된 퀴즈 내용이 비어있습니다.")
-            return
-        
-        # 데이터베이스에 저장
+            # 제미나이 설정
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-preview-05-20",  # 더 안정적인 모델로 변경
+                contents=[
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": query_text
+                            }
+                        ]
+                    }
+                ],
+                config=types.GenerateContentConfig(
+                    temperature=1.2,  # 온도를 낮춰서 더 안정적인 응답
+                    max_output_tokens=1000,  # 토큰 수를 줄여서 안정성 향상
+                )
+            )
+
+            # API 응답 상세 검증
+            if response is None:
+                print(f"❌ 시도 {attempt + 1}: response가 None입니다.")
+                continue
+                
+            if not hasattr(response, 'text') or response.text is None:
+                print(f"❌ 시도 {attempt + 1}: response.text가 None입니다.")
+                continue
+                
+            quiz_content = response.text.strip()
+            
+            # 빈 내용 체크
+            if not quiz_content:
+                print(f"❌ 시도 {attempt + 1}: 생성된 퀴즈 내용이 비어있습니다.")
+                continue
+            
+            # 성공적으로 응답을 받았으면 나머지 로직 실행
+            print(f"✅ 시도 {attempt + 1}에서 성공!")
+            break
+            
+        except Exception as e:
+            print(f"❌ 시도 {attempt + 1} 실패: {e}")
+            if attempt == max_retries - 1:
+                print("❌ 모든 재시도 실패. 나중에 다시 시도하세요.")
+                return
+            time.sleep(5)  # 재시도 전 5초 대기
+    
+    else:
+        print("❌ 모든 시도에서 유효한 응답을 받지 못했습니다.")
+        return
+
+    # 나머지 데이터베이스 저장 로직은 그대로...
+    try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -144,19 +167,18 @@ def generate_quiz():
             (quiz_content,)
         )
         
-        # Railway가 아닌 경우에만 commit과 close
         if not IS_RAILWAY:
             conn.commit()
             conn.close()
         else:
-            conn.commit()  # 메모리 DB도 commit은 필요
+            conn.commit()
         
         quiz_id = cursor.lastrowid
         
         print(f"✅ 퀴즈 ID {quiz_id} 생성 완료!")
         print(f"📝 내용 미리보기: {quiz_content[:100]}...")
         
-        # 파일 백업 저장 (Railway에서도 임시로 저장)
+        # 파일 백업 저장
         try:
             with open("cote_bot.txt", "a", encoding="utf-8") as file:
                 file.write(f"\n[{datetime.now()}] Quiz ID: {quiz_id}\n")
@@ -166,9 +188,10 @@ def generate_quiz():
             print(f"⚠️ 파일 백업 실패 (Railway에서는 정상): {file_error}")
             
     except Exception as e:
-        print(f"❌ 퀴즈 생성 중 오류: {e}")
+        print(f"❌ 데이터베이스 저장 중 오류: {e}")
         import traceback
         traceback.print_exc()
+
 
 def run_scheduler():
     """스케줄러 실행"""
