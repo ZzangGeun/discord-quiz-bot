@@ -60,7 +60,7 @@ async def send_quiz_task():
                             print(f"🔍 원본 내용: {quiz_content[:200]}...")
                             conn.close()
                             return
-                        await channel.send(f"\U0001F3AF **퀴즈 #{quiz_id}**\n{quiz_only}\n\n⏰ *30분 후에 정답이 공개됩니다!*")
+                        await channel.send(f"\U0001F3AF **퀴즈 #{quiz_id}**\n{quiz_only}\n\n⏰ *2시간 후에 정답이 공개됩니다!*")
                         cursor.execute('''
                             UPDATE quizzes 
                             SET sent_to_discord = TRUE, quiz_sent_at = ? 
@@ -79,7 +79,7 @@ async def check_and_send_answers():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        thirty_minutes_ago = get_kst_now() - timedelta(minutes=30)
+        two_hours_ago = get_kst_now() - timedelta(hours=2)
         cursor.execute('''
             SELECT id, content FROM quizzes 
             WHERE sent_to_discord = TRUE 
@@ -87,7 +87,7 @@ async def check_and_send_answers():
             AND quiz_sent_at IS NOT NULL 
             AND quiz_sent_at <= ?
             ORDER BY quiz_sent_at ASC
-        ''', (thirty_minutes_ago,))
+        ''', (two_hours_ago,))
         results = cursor.fetchall()
         for quiz_id, quiz_content in results:
             if QUIZ_CHANNEL_ID is not None:

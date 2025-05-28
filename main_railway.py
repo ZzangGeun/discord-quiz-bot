@@ -46,7 +46,7 @@ def run_discord_bot():
     """Discord 봇 실행"""
     print("🎮 Discord 봇을 시작합니다...")
     try:
-        # discord_bot_final.py에서 봇 가져와서 실행 (★ 구분자 및 30분 간격 기능 포함)
+        # discord_bot_final.py에서 봇 가져와서 실행 (★ 구분자 및 2시간 간격 기능 포함)
         from discord_bot_final import bot
         bot.run(BOT_TOKEN)
     except Exception as e:
@@ -66,7 +66,7 @@ def main():
     print("\n🚀 Railway에서 시스템을 시작합니다...")
     print("📝 1시간마다 새로운 퀴즈가 생성됩니다.")
     print("📨 3시간마다 새로운 퀴즈를 Discord에 자동 전송합니다.")
-    print("💡 30분 후 자동으로 정답이 공개됩니다.")
+    print("💡 2시간 후 자동으로 정답이 공개됩니다.")
     print("⭐ 봇 명령어: /퀴즈, /답 (슬래시 명령어)")
     print("🛤️ Railway 24/7 호스팅으로 안정적 운영\n")
     
