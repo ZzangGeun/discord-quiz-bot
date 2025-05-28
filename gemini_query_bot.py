@@ -129,7 +129,7 @@ def generate_quiz():
             
             # 제미나이 설정 - 더 간단한 방식으로 호출
             response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
+                model="gemini-2.5-flash-preview-04-17",
                 contents=query_text,  # 더 간단한 방식
                 config=types.GenerateContentConfig(
                     temperature=1.2,
