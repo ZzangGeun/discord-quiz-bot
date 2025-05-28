@@ -46,8 +46,8 @@ def run_discord_bot():
     """Discord 봇 실행"""
     print("🎮 Discord 봇을 시작합니다...")
     try:
-        # discord_bot.py에서 봇 가져와서 실행 (★ 구분자 및 30분 간격 기능 포함)
-        from discord_bot import bot
+        # discord_bot_final.py에서 봇 가져와서 실행 (★ 구분자 및 30분 간격 기능 포함)
+        from discord_bot_final import bot
         bot.run(BOT_TOKEN)
     except Exception as e:
         print(f"❌ Discord 봇 오류: {e}")

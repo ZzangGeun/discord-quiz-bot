@@ -22,8 +22,11 @@ query_text = """
 2) 너는 코딩테스트, 알고리즘, SQL등 테스트를 위해 문제를 출제하는 AI야 난이도는 컴퓨터공학과의 학부 졸업생이 20분 정도 고민해야 풀 수 있는 중상급 수준이어야 해.                                                                                                                                         
 3) 선택한 학문과 관련해서 구글 검색을 이용해서 개념을 매우 상세히 학습 후 다양한 문제를 출제하면 돼.
 4) 문제 중 코딩테스트의 경우는 파이썬과 C 두개의 문법을 사용하는데 두개의 문법을 사용 하면 선지에도 파이썬과 C가 같은 결과 값을 출력하도록 하거나 작성 코드에 빈칸을 넣어 선지로 선택할 수 있도록 해줘. 복잡한 알고리즘, 자료구조, 시간복잡도 분석이 필요한 문제를 출제해줘.                                                                                                                             
-5) 학습한 개념을 가지고 객관식 또는 주관식 문제를 1문제만 문제와 답을 출력 하는데 답 앞에는 반드시 ★을 넣어 문제와 답을 구분하기 위한 구분자로 사용할거야. 문제는 단순 암기보다는 깊은 이해와 응용이 필요한 수준으로 출제해줘.                                                                                                                                                 
-주의) 절대로 순서대로 문제를 출제하지마. 출제할 개념의 순서는 랜덤으로 가지고 와야해.
+5) 학습한 개념을 가지고 객관식 또는 주관식 문제를 1문제만 문제와 답을 출력 하는데 문제의 답 앞에는 반드시 ★을 넣어 문제와 답을 구분하기 위한 구분자로 사용할거야. 문제는 단순 암기보다는 깊은 이해와 응용이 필요한 수준으로 출제해줘.                                                                                                                                                 
+주의사항) 
+- 절대로 순서대로 문제를 출제하지마. 출제할 개념의 순서는 랜덤으로 가지고 와야해.
+- 반드시 ★ 기호를 답 앞에 포함해야 해. 이는 필수 요구사항이야.
+- ★ 기호는 정확히 "★답:" 형태로 작성해야 해.
 
 3. 표현                                                                                                                                                                                               
 - 너의 응답 양식은 다음과 같아.                                                                                                                                                                       
@@ -37,7 +40,6 @@ c)
 d)
 
 ★답: (답)                                                                                                                                                                                             
-주의) ★는 선지와 답을 구분해주기 위한 구분자야.
 
 4. 예시(객관식 문제)                                                                                                                                                                                               
 오늘의 문제- 다음 중 이진 탐색 트리에서 특정 값 k보다 작은 모든 노드의 개수를 O(log n) 시간 복잡도로 구하기 위해 각 노드에 추가로 저장해야 하는 정보는?                                                                                                                                      
@@ -51,11 +53,12 @@ d)
 ★답: (c)
 
 5. 예시(주관식 문제)
-동적 계획법을 사용하여 0-1 배낭 문제를 해결하는 파이썬 함수 또는 C 함수를 작성하세요. 가방의 용량은 W, 물건들의 무게는 weights 리스트, 가치는 values 리스트로 주어집니다.
+동적 계획법을 사용하여 0-1 배낭 문제를 해결하는 파이썬 함수 또는 C 함수를 작성하세요. 
+가방의 용량은 W, 물건들의 무게는 weights 리스트, 가치는 values 리스트로 주어집니다.
 
 ★답:
-1. 파이썬
-(def knapsack(W, weights, values, n):
+1. 파이썬 : 
+def knapsack(W, weights, values, n):
     dp = [[0 for _ in range(W + 1)] for _ in range(n + 1)]
     for i in range(1, n + 1):
         for w in range(1, W + 1):
@@ -63,9 +66,9 @@ d)
                 dp[i][w] = max(values[i-1] + dp[i-1][w-weights[i-1]], dp[i-1][w])
             else:
                 dp[i][w] = dp[i-1][w]
-    return dp[n][W])
+    return dp[n][W]
 
-2. C언어
+2. C언어:
 #include <stdio.h>
 
 int knapsack(int W, int weights[], int values[], int n) {
@@ -97,25 +100,6 @@ int knapsack(int W, int weights[], int values[], int n) {
 
 # init_database 함수는 database_helper에서 import됨
 
-def test_gemini_connection():
-    """Gemini API 연결 테스트"""
-    try:
-        print("🔍 Gemini API 연결 테스트 중...")
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
-            contents="안녕하세요. 간단한 테스트입니다."
-        )
-        
-        if response and hasattr(response, 'text') and response.text:
-            print("✅ Gemini API 연결 성공!")
-            print(f"📄 응답: {response.text[:100]}...")
-            return True
-        else:
-            print("❌ API 응답이 비어있습니다.")
-            return False
-    except Exception as e:
-        print(f"❌ API 연결 실패: {e}")
-        return False
 
 
 def generate_quiz():
@@ -129,7 +113,7 @@ def generate_quiz():
             
             # 제미나이 설정 - 더 간단한 방식으로 호출
             response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-04-17",
+                model="gemini-2.5-flash-preview-05-20",
                 contents=query_text,  # 더 간단한 방식
                 config=types.GenerateContentConfig(
                     temperature=1.2,
@@ -168,10 +152,21 @@ def generate_quiz():
                 continue
             
             quiz_content = quiz_content.strip()
-            
-            # 빈 내용 체크
+              # 빈 내용 체크
             if not quiz_content:
                 print(f"❌ 시도 {attempt + 1}: 퀴즈 내용이 공백입니다.")
+                continue
+            
+            # ★ 구분자 검증
+            if '★' not in quiz_content:
+                print(f"❌ 시도 {attempt + 1}: 퀴즈에 ★ 구분자가 없습니다.")
+                print(f"🔍 생성된 내용: {quiz_content[:200]}...")
+                continue
+            
+            # ★답: 형식 검증
+            if '★답:' not in quiz_content and '★답 :' not in quiz_content:
+                print(f"❌ 시도 {attempt + 1}: '★답:' 형식이 올바르지 않습니다.")
+                print(f"🔍 생성된 내용: {quiz_content[:200]}...")
                 continue
             
             # 성공적으로 응답을 받았으면 나머지 로직 실행
@@ -233,10 +228,6 @@ def run_scheduler():
     # 데이터베이스 초기화
     init_database()
     
-    # API 연결 테스트
-    if not test_gemini_connection():
-        print("❌ Gemini API 연결에 실패했습니다. API 키를 확인해주세요.")
-        return
     
     # 첫 번째 퀴즈 즉시 생성
     generate_quiz()
