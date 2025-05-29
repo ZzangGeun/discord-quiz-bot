@@ -101,7 +101,7 @@ int knapsack(int W, int weights[], int values[], int n) {
 
 def generate_quiz():
     """퀴즈를 생성하고 데이터베이스에 저장"""
-    max_retries = 3
+    max_retries = 5
     
     for attempt in range(max_retries):
         try:
@@ -113,14 +113,11 @@ def generate_quiz():
                 model="gemini-2.5-flash-preview-05-20",
                 contents=query_text,  # 더 간단한 방식
                 config=types.GenerateContentConfig(
-                    temperature=1.3,
+                    temperature=1.1,
                     max_output_tokens=2000,
                 )
             )
 
-            # API 응답 상세 검증 및 디버깅
-            print(f"🔍 디버그: response 타입: {type(response)}")
-            print(f"🔍 디버그: response 속성: {dir(response) if response else 'None'}")
             
             if response is None:
                 print(f"❌ 시도 {attempt + 1}: response가 None입니다.")
