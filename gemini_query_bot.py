@@ -76,9 +76,8 @@ def generate_quiz():
             response = client.models.generate_content(
                                 model = "gemini-2.5-flash-preview-05-20",
                                 contents=query_text,
-                                generation_config=types.GenerationConfig( # Use generation_config instead of config
-                                    temperature=0.8,
-                                    max_output_tokens=2500,
+                                config=types.GenerateContentConfig(                                                                                                                                                                
+                                    temperature=1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
                                 )
                             )
 
