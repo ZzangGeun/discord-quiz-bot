@@ -74,108 +74,86 @@ def knapsack(W, weights, values, n):
 def generate_quiz():
     """퀴즈를 생성하고 데이터베이스에 저장"""
     max_retries = 5
-    
+
     for attempt in range(max_retries):
         try:
             print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중... (시도 {attempt + 1}/{max_retries})")
             print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
-            
-            # 제미나이 설정 - 더 간단한 방식으로 호출
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
-                contents=query_text,  # 더 간단한 방식
-                config=types.GenerateContentConfig(
-                    temperature=0.8,
-                    max_output_tokens=2500,
-                )
+
+            # Gemini chat API 호출
+            response = client.generate_content(
+                contents=[{"role": "user", "parts": [query_text]}],
+                generation_config={
+                    "temperature": 0.7,
+                    "max_output_tokens": 1500,
+                }
             )
 
-            
-            if response is None:
-                print(f"❌ 시도 {attempt + 1}: response가 None입니다.")
+            if not response:
+                print(f"❌ 시도 {attempt + 1}: 응답이 None입니다.")
                 continue
-            
-            # candidates 속성을 통해 접근 시도
+
+            # 텍스트 추출
             quiz_content = None
-            try:
-                if hasattr(response, 'candidates') and response.candidates:
-                    candidate = response.candidates[0]
-                    if hasattr(candidate, 'content') and candidate.content:
-                        if hasattr(candidate.content, 'parts') and candidate.content.parts:
-                            quiz_content = candidate.content.parts[0].text
-                elif hasattr(response, 'text'):
-                    quiz_content = response.text
-                else:
-                    continue
-            except Exception as parse_error:
-                print(f"❌ 응답 파싱 오류: {parse_error}")
-                continue
-                
+            if hasattr(response, 'text') and response.text:
+                quiz_content = response.text.strip()
+            elif hasattr(response, 'candidates') and response.candidates:
+                quiz_content = response.candidates[0].content.parts[0].text.strip()
+
             if not quiz_content:
                 print(f"❌ 시도 {attempt + 1}: 생성된 퀴즈 내용이 비어있습니다.")
                 continue
-            
-            quiz_content = quiz_content.strip()
-              # 빈 내용 체크
-            if not quiz_content:
-                print(f"❌ 시도 {attempt + 1}: 퀴즈 내용이 공백입니다.")
-                continue
-            
-            # ★ 구분자 검증
-            if '★' not in quiz_content:
-                print(f"❌ 시도 {attempt + 1}: 퀴즈에 ★ 구분자가 없습니다.")
-                continue
-            
-            # ★답: 형식 검증
-            if '★답:' not in quiz_content and '★답 :' not in quiz_content:
+
+            # ★답: 패턴 확인
+            if not re.search(r"★\s*답\s*:", quiz_content):
                 print(f"❌ 시도 {attempt + 1}: '★답:' 형식이 올바르지 않습니다.")
+                print("🔍 생성된 응답:\n", quiz_content)
                 continue
-            
-            # 성공적으로 응답을 받았으면 나머지 로직 실행
+
             print(f"✅ 시도 {attempt + 1}에서 성공!")
             break
-            
+
         except Exception as e:
             print(f"❌ 시도 {attempt + 1} 실패: {e}")
             if attempt == max_retries - 1:
                 print("❌ 모든 재시도 실패. 나중에 다시 시도하세요.")
                 return
-            time.sleep(5)  # 재시도 전 5초 대기
-    
+            time.sleep(5)  # 재시도 전 대기
+
     else:
         print("❌ 모든 시도에서 유효한 응답을 받지 못했습니다.")
         return
 
-    # 나머지 데이터베이스 저장 로직은 그대로...
+    # DB 저장
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
+
         cursor.execute(
             'INSERT INTO quizzes (content) VALUES (?)',
             (quiz_content,)
         )
-        
+
         if not IS_RAILWAY:
             conn.commit()
             conn.close()
         else:
             conn.commit()
-        
+
         quiz_id = cursor.lastrowid
-        
+
         print(f"✅ 퀴즈 ID {quiz_id} 생성 완료!")
         print(f"📝 내용 미리보기: {quiz_content[:100]}...")
-        
-        # 파일 백업 저장
+
+        # 로컬 파일 백업
         try:
             with open("cote_bot.txt", "a", encoding="utf-8") as file:
                 file.write(f"\n[{datetime.now()}] Quiz ID: {quiz_id}\n")
                 file.write(quiz_content)
-                file.write("\n" + "="*50 + "\n")
+                file.write("\n" + "=" * 50 + "\n")
         except Exception as file_error:
             print(f"⚠️ 파일 백업 실패 (Railway에서는 정상): {file_error}")
-            
+
     except Exception as e:
         print(f"❌ 데이터베이스 저장 중 오류: {e}")
         import traceback
