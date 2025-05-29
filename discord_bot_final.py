@@ -79,7 +79,7 @@ async def send_quiz_task():
         except Exception as e:
             print(f"❌ 퀴즈 전송 중 오류: {e}")
 
-@tasks.loop(minutes=1)
+@tasks.loop(minutes=5)
 async def check_and_send_answers():
     try:
         conn = get_db_connection()

@@ -11,7 +11,7 @@ from database_helper import get_db_connection, init_database, IS_RAILWAY
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY 환경변수를 설정해주세요!")
 
-client = genai.GenerativeModel("gemini-2.5-flash-preview-05-20") # Initialize client globally or pass it
+client = genai.Client(api_key=GEMINI_API_KEY) # Initialize client globally or pass it
 
 # 제미나이한테 보낼 text 작성
 query_text = """
@@ -72,15 +72,15 @@ def generate_quiz():
             print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중... (시도 {attempt + 1}/{max_retries})")
             print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
 
-            # 제미나이 설정 - 더 간단한 방식으로 호출 (client.models.generate_content -> client.generate_content)
-            # Or if client is already genai.GenerativeModel("model_name"), just use client.generate_content
-            response = client.generate_content(
-                contents=query_text,
-                generation_config=types.GenerationConfig( # Use generation_config instead of config
-                    temperature=0.8,
-                    max_output_tokens=2500,
-                )
-            )
+
+            response = client.models.generate_content(
+                                model = "gemini-2.5-flash-preview-05-20",
+                                contents=query_text,
+                                generation_config=types.GenerationConfig( # Use generation_config instead of config
+                                    temperature=0.8,
+                                    max_output_tokens=2500,
+                                )
+                            )
 
             if response is None or not hasattr(response, 'text'):
                 print(f"❌ 시도 {attempt + 1}: response가 None이거나 text 속성이 없습니다.")
