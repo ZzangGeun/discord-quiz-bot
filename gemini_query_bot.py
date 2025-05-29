@@ -21,7 +21,7 @@ query_text = """
 1) 너는 대답하지말고 바로 문제를 출제하면 돼.
 2) 너는 코딩테스트, 알고리즘, SQL등 테스트를 위해 문제를 출제하는 AI야 난이도는 컴퓨터공학과의 학부 졸업생이 20분 정도 고민해야 풀 수 있는 중상급 수준이어야 해.                                                                                                                                         
 3) 선택한 학문과 관련해서 구글 검색을 이용해서 개념을 매우 상세히 학습 후 다양한 문제를 출제하면 돼.
-4) 문제 중 코딩테스트의 경우는 파이썬 또는 C 두개의 문법을 사용하는데 두개의 문법을 사용 하면 선지에도 파이썬과 C가 같은 결과 값을 출력하도록 하거나 작성 코드에 빈칸을 넣어 선지로 선택할 수 있도록 해줘. 복잡한 알고리즘, 자료구조, 시간복잡도 분석이 필요한 문제를 출제해줘.                                                                                                                             
+4) 문제 중 코딩테스트의 경우는 파이썬으로 내거나 C언어로 내줘. 복잡한 알고리즘, 자료구조, 시간복잡도 모두 고려하여 다양한 문제를 출제해줘.                                                                                                                             
 5) 학습한 개념을 가지고 객관식 또는 주관식 문제를 1문제만 문제와 답을 출력 하는데 문제의 답 앞에는 반드시 ★을 넣어 문제와 답을 구분하기 위한 구분자로 사용할거야. 문제는 단순 암기보다는 깊은 이해와 응용이 필요한 수준으로 출제해줘.                                                                                                                                                 
 주의사항) 
 - 절대로 순서대로 문제를 출제하지마. 출제할 개념의 순서는 랜덤으로 가지고 와야해.
@@ -53,7 +53,7 @@ d)
 ★답: (c)
 
 5. 예시(주관식 문제)
-동적 계획법을 사용하여 0-1 배낭 문제를 해결하는 파이썬 함수 또는 C 함수로 작성하세요. 
+동적 계획법을 사용하여 0-1 배낭 문제를 해결하는 파이썬 함수로 작성하세요. 
 가방의 용량은 W, 물건들의 무게는 weights 리스트, 가치는 values 리스트로 주어집니다.
 
 ★답:
@@ -68,34 +68,6 @@ def knapsack(W, weights, values, n):
                 dp[i][w] = dp[i-1][w]
     return dp[n][W]
 
-2. C언어:
-#include <stdio.h>
-
-int knapsack(int W, int weights[], int values[], int n) {
-    int dp[n+1][W+1];
-
-    // 초기화
-    for (int i = 0; i <= n; i++) {
-        for (int w = 0; w <= W; w++) {
-            dp[i][w] = 0;
-        }
-    }
-
-    // DP 테이블 채우기
-    for (int i = 1; i <= n; i++) {
-        for (int w = 1; w <= W; w++) {
-            if (weights[i-1] <= w) {
-                int include = values[i-1] + dp[i-1][w - weights[i-1]];
-                int exclude = dp[i-1][w];
-                dp[i][w] = (include > exclude) ? include : exclude;
-            } else {
-                dp[i][w] = dp[i-1][w];
-            }
-        }
-    }
-
-    return dp[n][W];
-}
 """
 
 
@@ -113,8 +85,8 @@ def generate_quiz():
                 model="gemini-2.5-flash-preview-05-20",
                 contents=query_text,  # 더 간단한 방식
                 config=types.GenerateContentConfig(
-                    temperature=1.1,
-                    max_output_tokens=2000,
+                    temperature=0.8,
+                    max_output_tokens=2500,
                 )
             )
 
