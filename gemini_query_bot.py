@@ -81,7 +81,7 @@ def generate_quiz():
             print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
 
             # Gemini chat API 호출
-            response = client.generate_content(
+            response = client.models.chat(
                 contents=[{"role": "user", "parts": [query_text]}],
                 generation_config={
                     "temperature": 0.7,
