@@ -134,8 +134,6 @@ def generate_quiz():
                 elif hasattr(response, 'text'):
                     quiz_content = response.text
                 else:
-                    print(f"🔍 디버그: response 구조를 파악할 수 없습니다.")
-                    print(f"🔍 디버그: response 내용: {response}")
                     continue
             except Exception as parse_error:
                 print(f"❌ 응답 파싱 오류: {parse_error}")
@@ -154,13 +152,11 @@ def generate_quiz():
             # ★ 구분자 검증
             if '★' not in quiz_content:
                 print(f"❌ 시도 {attempt + 1}: 퀴즈에 ★ 구분자가 없습니다.")
-                print(f"🔍 생성된 내용: {quiz_content[:200]}...")
                 continue
             
             # ★답: 형식 검증
             if '★답:' not in quiz_content and '★답 :' not in quiz_content:
                 print(f"❌ 시도 {attempt + 1}: '★답:' 형식이 올바르지 않습니다.")
-                print(f"🔍 생성된 내용: {quiz_content[:200]}...")
                 continue
             
             # 성공적으로 응답을 받았으면 나머지 로직 실행
@@ -217,7 +213,7 @@ def generate_quiz():
 def run_scheduler():
     """스케줄러 실행"""
     print("🕐 퀴즈 생성 스케줄러를 시작합니다...")
-    print("📅 1시간마다 새로운 퀴즈가 생성됩니다.")
+    print("📅 30분마다 새로운 퀴즈가 생성됩니다.")
     
     # 데이터베이스 초기화
     init_database()
@@ -226,13 +222,13 @@ def run_scheduler():
     # 첫 번째 퀴즈 즉시 생성
     generate_quiz()
 
-    # 1시간마다 퀴즈 생성 스케줄
-    schedule.every(1).hours.do(generate_quiz)
+    # 30분마다 퀴즈 생성 스케줄
+    schedule.every(30).minutes.do(generate_quiz)
 
     # 스케줄러 실행
     while True:
         schedule.run_pending()
-        time.sleep(600)  # 10분마다 체크
+        time.sleep(60)  # 1분마다 체크
 
 if __name__ == "__main__":
     run_scheduler()
