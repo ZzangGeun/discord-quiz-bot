@@ -77,7 +77,8 @@ def generate_quiz():
                                 model = "gemini-2.5-flash-preview-05-20",
                                 contents=query_text,
                                 config=types.GenerateContentConfig(                                                                                                                                                                
-                                    temperature=1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                    temperature=1
+                                    max_token = 2000
                                 )
                             )
 
