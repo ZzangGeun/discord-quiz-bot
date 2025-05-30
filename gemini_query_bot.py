@@ -28,16 +28,8 @@ query_text = """
 - 반드시 ★ 기호를 답 앞에 포함해야 해. 이는 필수 요구사항이야.
 - ★ 기호는 정확히 "★답:" 형태로 작성해야 해.
 
-3. 표현
-- 너의 응답 양식은 다음과 같아.
-오늘의 문제- (문제)
-a)
-b)
-c)
-d)
-★답: (답)
 
-4. 예시(객관식 문제)
+3. 예시(객관식 문제)
 오늘의 문제- 다음 중 이진 탐색 트리에서 특정 값 k보다 작은 모든 노드의 개수를 O(log n) 시간 복잡도로 구하기 위해 각 노드에 추가로 저장해야 하는 정보는?
 - a) 왼쪽 서브트리의 노드 개수
 - b) 오른쪽 서브트리의 노드 개수
@@ -45,7 +37,7 @@ d)
 - d) 부모 노드에 대한 포인
 ★답: (c)
 
-5. 예시(주관식 문제)
+4. 예시(주관식 문제)
 동적 계획법을 사용하여 0-1 배낭 문제를 해결하는 파이썬 함수로 작성하세요.
 가방의 용량은 W, 물건들의 무게는 weights 리스트, 가치는 values 리스트로 주어집니다.
 
@@ -70,17 +62,18 @@ def generate_quiz():
     for attempt in range(max_retries):
         try:
             print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중... (시도 {attempt + 1}/{max_retries})")
-            print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")            response = client.models.generate_content(
+            print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")            
+            response = client.models.generate_content(
                                 model = "gemini-2.5-flash-preview-05-20",
                                 contents=query_text,
                                 config=types.GenerateContentConfig(                                                                                                                                                                
-                                    temperature=1,
+                                    temperature=0.8,
                                     max_output_tokens=4000
                                 )
                             )
 
-            if response is None or not hasattr(response, 'text'):
-                print(f"❌ 시도 {attempt + 1}: response가 None이거나 text 속성이 없습니다.")
+            if response is None or not hasattr(response, 'text') or response.text is None:
+                print(f"❌ 시도 {attempt + 1}: response가 None이거나 text 속성이 없거나 text가 None입니다.")
                 continue
 
             quiz_content = response.text.strip() # Directly access response.text
@@ -133,7 +126,7 @@ def generate_quiz():
             with open("cote_bot.txt", "a", encoding="utf-8") as file:
                 file.write(f"\n[{datetime.now()}] Quiz ID: {quiz_id}\n")
                 file.write(quiz_content)
-                file.write("\n" + "="*50 + "\n")
+                file.write("\n" + "="*130 + "\n")
         except Exception as file_error:
             print(f"⚠️ 파일 백업 실패: {file_error}") # This is usually fine on Railway if it's ephemeral storage
 
