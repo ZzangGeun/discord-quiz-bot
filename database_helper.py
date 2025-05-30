@@ -30,11 +30,12 @@ def init_database():
     """데이터베이스 초기화 (환경별 대응)"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS quizzes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             content TEXT NOT NULL,
+            question TEXT NULL,
+            answer TEXT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             sent_to_discord BOOLEAN DEFAULT FALSE,
             quiz_sent_at TIMESTAMP NULL,
@@ -43,21 +44,20 @@ def init_database():
         )
     ''')
     
-    # 기존 테이블에 컬럼이 없다면 추가
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN quiz_sent_at TIMESTAMP NULL')
-    except sqlite3.OperationalError:
-        pass
+    # 기존 테이블에 새 컬럼들 추가
+    columns_to_add = [
+        ('question', 'TEXT NULL'),
+        ('answer', 'TEXT NULL'),
+        ('quiz_sent_at', 'TIMESTAMP NULL'),
+        ('answer_sent', 'BOOLEAN DEFAULT FALSE'),
+        ('answer_sent_at', 'TIMESTAMP NULL')
+    ]
     
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent BOOLEAN DEFAULT FALSE')
-    except sqlite3.OperationalError:
-        pass
-        
-    try:
-        cursor.execute('ALTER TABLE quizzes ADD COLUMN answer_sent_at TIMESTAMP NULL')
-    except sqlite3.OperationalError:
-        pass
+    for column_name, column_type in columns_to_add:
+        try:
+            cursor.execute(f'ALTER TABLE quizzes ADD COLUMN {column_name} {column_type}')
+        except sqlite3.OperationalError:
+            pass
     
     conn.commit()
     conn.close()

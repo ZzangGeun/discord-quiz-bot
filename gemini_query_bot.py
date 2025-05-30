@@ -22,12 +22,14 @@ query_text = """
 2) 선택한 학문과 관련해서 구글 검색을 이용해서 개념을 매우 상세히 학습 후 다양한 문제를 출제하면 돼.
 3) 문제 중 코딩테스트의 경우는 파이썬으로 내줘. 복잡한 알고리즘, 자료구조, 시간복잡도 모두 고려하여 다양한 문제를 출제해줘.
 4) 학습한 개념을 가지고 객관식 또는 주관식 문제를 1문제만 문제와 답을 출력 하는데 문제의 답 앞에는 반드시 ★을 넣어 문제와 답을 구분하기 위한 구분자로 사용할거야. 문제는 단순 암기보다는 깊은 이해와 응용이 필요한 수준으로 출제해줘.
+5) 디스코드에 문제를 전송할 거라 MarkDown 문법의 수식 표현은 사용하지 말아줘. (예: LaTeX 수식 표현은 사용하지 말 것)
+
 
 주의사항)
 - 반드시 문제는 1문제만 출제해야 해.
 - 문제는 객관식 또는 주관식 중 하나로 출제해야 해. 객관식 문제는 4지선다형으로 출제하고, 주관식 문제는 파이썬 코드로 작성해야 해.
 - 절대로 순서대로 문제를 출제하지마. 출제할 개념의 순서는 랜덤으로 가지고 와야해.
-- 반드시 ★ 기호를 답 앞에 포함해야 해. 이는 필수 요구사항이야.
+- 주관식 문제의 답은 주석을 달 필요 없이 코드만 작성해줘.
 - ★ 기호는 정확히 "★답:" 형태로 작성해야 해.
 
 
@@ -103,16 +105,27 @@ def generate_quiz():
             time.sleep(5)  # 재시도 전 5초 대기
     else: # This else block runs if the loop completes without a 'break'
         print("❌ 모든 시도에서 유효한 응답을 받지 못했습니다.")
-        return
-
-    # 나머지 데이터베이스 저장 로직은 그대로...
+        return    # 나머지 데이터베이스 저장 로직은 그대로...
     try:
+        # ★ 구분자로 문제와 답 분리
+        def parse_quiz_content(content):
+            """퀴즈 내용을 문제와 답으로 분리"""
+            if '★답:' not in content:
+                return content, "답 없음"
+            
+            parts = content.split('★답:', 1)
+            question = parts[0].strip()
+            answer = parts[1].strip() if len(parts) > 1 else "답 없음"
+            return question, answer
+        
+        question, answer = parse_quiz_content(quiz_content)
+        
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            'INSERT INTO quizzes (content) VALUES (?)',
-            (quiz_content,)
+            'INSERT INTO quizzes (content, question, answer) VALUES (?, ?, ?)',
+            (quiz_content, question, answer)
         )
 
         conn.commit() # Commit regardless of Railway or local for consistency
