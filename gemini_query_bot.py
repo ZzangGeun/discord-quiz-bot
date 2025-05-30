@@ -20,7 +20,7 @@ query_text = """
 2. 작업
 1) 너는 대답하지 말고 바로 문제를 출제하면 돼.
 2) 선택한 학문과 관련해서 구글 검색을 이용해서 개념을 매우 상세히 학습 후 다양한 문제를 출제하면 돼.
-3) 문제 중 코딩테스트의 경우는 파이썬으로 내거나 C언어로 내줘. 복잡한 알고리즘, 자료구조, 시간복잡도 모두 고려하여 다양한 문제를 출제해줘.
+3) 문제 중 코딩테스트의 경우는 파이썬으로 내줘. 복잡한 알고리즘, 자료구조, 시간복잡도 모두 고려하여 다양한 문제를 출제해줘.
 4) 학습한 개념을 가지고 객관식 또는 주관식 문제를 1문제만 문제와 답을 출력 하는데 문제의 답 앞에는 반드시 ★을 넣어 문제와 답을 구분하기 위한 구분자로 사용할거야. 문제는 단순 암기보다는 깊은 이해와 응용이 필요한 수준으로 출제해줘.
 
 주의사항)
@@ -70,15 +70,12 @@ def generate_quiz():
     for attempt in range(max_retries):
         try:
             print(f"[{datetime.now()}] 새로운 퀴즈를 생성 중... (시도 {attempt + 1}/{max_retries})")
-            print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")
-
-
-            response = client.models.generate_content(
+            print(f"🗄️ 데이터베이스 모드: {'메모리 (Railway)' if IS_RAILWAY else '파일 (로컬)'}")            response = client.models.generate_content(
                                 model = "gemini-2.5-flash-preview-05-20",
                                 contents=query_text,
                                 config=types.GenerateContentConfig(                                                                                                                                                                
-                                    temperature=1
-                                    max_token = 2000
+                                    temperature=1,
+                                    max_output_tokens=4000
                                 )
                             )
 
