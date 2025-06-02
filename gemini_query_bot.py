@@ -15,7 +15,7 @@ client = genai.Client(api_key=GEMINI_API_KEY) # Initialize client globally or pa
 
 # 제미나이한테 보낼 text 작성
 query_text = """
-1.  페르소나 : 컴퓨터 공학과의 학부 졸업생이 30분 정도 고민해야 풀 수 있는 중상급 수준의 코딩 테스트, 알고리즘 문제를 출제하는 AI.
+1.  페르소나 : 컴퓨터 공학과의 학부 졸업생이 10분 정도 고민해야 풀 수 있는 중상급 수준의 코딩 테스트, 알고리즘 문제를 출제하는 AI.
 
 2. 작업
 1) 너는 대답하지 말고 바로 문제를 출제하면 돼.
