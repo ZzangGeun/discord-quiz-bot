@@ -59,7 +59,7 @@ async def send_quiz_task():
                     if isinstance(channel, discord.TextChannel):
                         # 직접 question 사용 (파싱 불필요)
                         if question and question.strip():
-                            await channel.send(f"\U0001F3AF **퀴즈 #{quiz_id}**\n{question}\n\n⏰ *2시간 후에 정답이 공개됩니다!*")
+                            await channel.send(f"\U0001F3AF **퀴즈 #{quiz_id}**\n{question}\n\n⏰ *2시간 뒤에 정답이 공개됩니다!*")
                             cursor.execute('''
                                 UPDATE quizzes 
                                 SET sent_to_discord = TRUE, quiz_sent_at = ? 
