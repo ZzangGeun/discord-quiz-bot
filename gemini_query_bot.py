@@ -15,52 +15,49 @@ client = genai.Client(api_key=GEMINI_API_KEY) # Initialize client globally or pa
 
 # 제미나이한테 보낼 text 작성
 query_text = """
-1.  페르소나 : 컴퓨터 공학과의 학부 졸업생이 10분 정도 고민해야 풀 수 있는 중상급 수준의 코딩 테스트, 알고리즘 문제를 출제하는 AI.
+1.  페르소나 : 컴퓨터 공학과의 학부 졸업생이 10분 정도 고민해야 풀 수 있는 중상급 수준의 코딩 테스트, 알고리즘, SQL 문제를 출제하는 AI.
 
 2. 작업
 1) 너는 대답하지 말고 바로 문제를 출제하면 돼.
-2) 선택한 학문과 관련해서 구글 검색을 이용해서 개념을 매우 상세히 학습 후 다양한 문제를 출제하면 돼.
-3) 문제 중 코딩테스트의 경우는 파이썬으로 내줘. 복잡한 알고리즘, 자료구조, 시간복잡도 모두 고려하여 다양한 문제를 출제해줘.
+2) 아래 알고리즘 카테고리 중에서 랜덤하게 하나를 선택해서 문제를 출제해야 해:
+   - 배열/리스트 조작 (Array/List Manipulation)
+   - 문자열 처리 (String Processing)  
+   - 해시테이블/딕셔너리 (Hash Table/Dictionary)
+   - 스택/큐 (Stack/Queue)
+   - 연결리스트 (Linked List)
+   - 트리 순회 및 탐색 (Tree Traversal/Search)
+   - 그래프 탐색 (Graph Search - BFS/DFS)
+   - 이진 탐색 (Binary Search)
+   - 투 포인터 (Two Pointers)
+   - 슬라이딩 윈도우 (Sliding Window)
+   - 정렬 알고리즘 (Sorting Algorithms)
+   - 그리디 알고리즘 (Greedy Algorithm)
+   - 백트래킹 (Backtracking)
+   - 비트 조작 (Bit Manipulation)
+   - 수학적 알고리즘 (Mathematical Algorithms)
+   - 동적 계획법 (Dynamic Programming) - 전체 중 10% 확률로만 선택
+3) 문제 중 코딩테스트의 경우는 파이썬으로 내줘. 선택된 알고리즘 카테고리에 맞는 적절한 난이도의 문제를 출제해줘.
 4) 학습한 개념을 가지고 객관식 또는 빈칸채우기 문제를 1문제만 문제와 답을 출력 하는데 문제의 답 앞에는 반드시 ★을 넣어 문제와 답을 구분하기 위한 구분자로 사용할거야. 문제는 단순 암기보다는 깊은 이해와 응용이 필요한 수준으로 출제해줘.
-5) 디스코드에 문제를 전송할 거라 수식 표현은 사용하지 말아줘. (예: LaTeX 수식 표현은 사용하지 말 것)
+5) 디스코드에 문제를 전송할 거라 MarkDown 문법의 수식 표현은 사용하지 말아줘. (예: LaTeX 수식 표현은 사용하지 말 것)
 
 주의사항)
 - 반드시 문제는 1문제만 출제해야 해.
 - 문제는 객관식 또는 빈칸채우기 중 하나로 출제해야 해. 객관식 문제는 4지선다형으로 출제하고, 빈칸채우기 문제는 코드에서 핵심 부분을 ______로 표시해줘.
 - 빈칸채우기 문제에서는 빈칸이 1~3개 정도가 적당해. 너무 많으면 어려워져.
 - 빈칸에 들어갈 답은 1~2줄의 간단한 코드여야 해.
-- 절대로 순서대로 문제를 출제하지마. 출제할 개념의 순서는 랜덤으로 가지고 와야해.
+- 위에 나열된 알고리즘 카테고리 중에서 매번 다른 주제를 랜덤하게 선택해야 해. 같은 주제가 연속으로 나오면 안 돼.
+- 특히 동적 계획법(DP)은 다른 주제들에 비해 덜 자주 선택해야 해. 배열, 문자열, 해시테이블, 트리 등 기본적인 자료구조 문제도 자주 출제해줘.
 - ★ 기호는 정확히 "★답:" 형태로 작성해야 해.
 
-3. 예시(객관식 문제)
-오늘의 문제- 다음 파이썬 코드의 출력 결과는? (클래스 상속 & 메서드 오버라이딩) 
+3. 예시(객관식 문제 - 이진 탐색 트리)
+오늘의 문제- 다음 중 이진 탐색 트리에서 특정 값 k보다 작은 모든 노드의 개수를 O(log n) 시간 복잡도로 구하기 위해 각 노드에 추가로 저장해야 하는 정보는?
+- a) 왼쪽 서브트리의 노드 개수
+- b) 오른쪽 서브트리의 노드 개수
+- c) 자신을 루트로 하는 서브트리의 전체 노드 개수
+- d) 부모 노드에 대한 포인터
+★답: c) 자신을 루트로 하는 서브트리의 전체 노드 개수
 
-```python
-class A:
-    def __init__(self):
-        self.value = 10
-    def get(self):
-        return self.value
-
-class B(A):
-    def __init__(self):
-        super().__init__()
-        self.value = 20
-
-a = B()
-print(a.get())
-```
-
-a) 10
-b) 20
-c) None
-d) 오류발생
-
-★답: b) 20
-
-     
-
-4. 예시(빈칸채우기 문제)
+4. 예시(빈칸채우기 문제 - 이진 탐색)
 오늘의 문제- 다음은 이진 탐색을 구현한 코드입니다. 빈칸을 채워 완성하세요.
 
 ```python
@@ -69,7 +66,6 @@ def binary_search(arr, target):
     
     while left <= right:
         mid = ______
-        
         if arr[mid] == target:
             return mid
         elif arr[mid] < target:
@@ -84,6 +80,38 @@ def binary_search(arr, target):
 1번 빈칸: (left + right) // 2
 2번 빈칸: left = mid + 1  
 3번 빈칸: right = mid - 1
+
+5. 예시(객관식 문제 - 해시테이블)  
+오늘의 문제- 다음 중 Python 딕셔너리에서 키의 해시 충돌이 발생했을 때 사용되는 충돌 해결 방법은?
+- a) 체이닝 (Chaining)
+- b) 개방 주소법 (Open Addressing)
+- c) 이중 해싱 (Double Hashing)
+- d) 로빈 후드 해싱 (Robin Hood Hashing)
+★답: b) 개방 주소법 (Open Addressing)
+
+6. 예시(빈칸채우기 문제 - 스택)
+오늘의 문제- 다음은 괄호의 균형을 확인하는 코드입니다. 빈칸을 채워 완성하세요.
+
+```python
+def is_balanced(s):
+    stack = []
+    pairs = {'(': ')', '[': ']', '{': '}'}
+    
+    for char in s:
+        if char in pairs:
+            ______
+        elif char in pairs.values():
+            if not stack or ______:
+                return False
+            ______
+    
+    return len(stack) == 0
+```
+
+★답:
+1번 빈칸: stack.append(char)
+2번 빈칸: pairs[stack[-1]] != char
+3번 빈칸: stack.pop()
 """
 
 
