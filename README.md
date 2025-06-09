@@ -154,8 +154,8 @@ discord_bot_clean/
 
 ### Gemini AI 설정
 - **모델**: `gemini-2.5-flash-preview-04-17`
-- **Temperature**: 1.5 (다양성 보장)
-- **최대 토큰**: 1500
+- **Temperature**: 1.2 (다양성 보장)
+- **최대 토큰**: 5000 (빈칸 문제 출제)
 
 ### Discord 봇 권한
 - `Send Messages`
