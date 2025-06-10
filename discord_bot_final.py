@@ -38,7 +38,7 @@ async def send_quiz_task():
     if 0 <= now.hour < 9:
         return
     
-    if now.hour % 8 == 0 and now.minute == 0:
+    if now.hour % 5 == 0 and now.minute == 0:
         try:
             if QUIZ_CHANNEL_ID is None:
                 print("⚠️ QUIZ_CHANNEL_ID가 설정되지 않았습니다.")
